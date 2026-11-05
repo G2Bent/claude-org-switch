@@ -121,9 +121,9 @@ def resolve(target):
     if len(hits) == 1:
         return hits[0]
     if len(hits) > 1:
-        print(f"'{target}' 对应多个组织，请写完整 uuid。运行 list 查看。", file=sys.stderr)
+        print(f"'{target}' matches several organizations; use the full uuid. Run list to see them.", file=sys.stderr)
         sys.exit(2)
-    print(f"找不到组织 '{target}'。运行 list 查看可用的组织。", file=sys.stderr)
+    print(f"No organization '{target}'. Run list to see the available ones.", file=sys.stderr)
     sys.exit(2)
 
 
@@ -137,26 +137,26 @@ def validate(org_dir):
         try:
             rec = load(path, None)
         except ValueError:
-            problems.append(f"{name}: 不是合法 JSON")
+            problems.append(f"{name}: not valid JSON")
             continue
         if not isinstance(rec, dict):
-            problems.append(f"{name}: 不是 JSON object")
+            problems.append(f"{name}: not a JSON object")
         elif rec.get("sessionId") != name[:-5]:
-            problems.append(f"{name}: sessionId 与文件名不一致")
+            problems.append(f"{name}: sessionId does not match the file name")
         elif not isinstance(rec.get("lastActivityAt"), int):
-            problems.append(f"{name}: lastActivityAt 不是整数")
+            problems.append(f"{name}: lastActivityAt is not an integer")
         if len(problems) >= 5:
             break
 
     idx = load(os.path.join(org_dir, IDX), {"v": 1, "archived": []})
     if not (isinstance(idx, dict) and idx.get("v") == 1 and isinstance(idx.get("archived"), list)):
-        problems.append(f"{IDX}: 结构不是 {{v: 1, archived: [...]}}")
+        problems.append(f"{IDX}: not shaped like {{v: 1, archived: [...]}}")
 
     tasks = load(os.path.join(org_dir, TASKS), {"scheduledTasks": []})
     if not (isinstance(tasks, dict) and isinstance(tasks.get("scheduledTasks"), list)
             and all(isinstance(t, dict) and isinstance(t.get("id"), str)
                     for t in tasks["scheduledTasks"])):
-        problems.append(f"{TASKS}: 结构不是 {{scheduledTasks: [{{id, ...}}]}}")
+        problems.append(f"{TASKS}: not shaped like {{scheduledTasks: [{{id, ...}}]}}")
 
     if problems:
         raise FormatError(org_dir + "\n  " + "\n  ".join(problems))
@@ -231,12 +231,12 @@ def run(target, do_apply):
         for o in sources + ([dst_uuid] if os.path.isdir(dst) else []):
             validate(os.path.join(acct_dir, o))
     except FormatError as e:
-        print("Claude Desktop 的存储格式和脚本认识的不一致，可能是 App 更新改了格式。"
-              "什么都没改。\n" + str(e), file=sys.stderr)
+        print("Claude Desktop storage does not look like what this script knows; "
+              "an app update may have changed it. Nothing was changed.\n" + str(e), file=sys.stderr)
         sys.exit(3)
 
     if do_apply and desktop_running():
-        print("Claude Desktop 还开着（或无法判断），什么都没改。先 ⌘Q 退出。", file=sys.stderr)
+        print("Claude Desktop is running (or its state is unknown). Nothing was changed. Quit it with ⌘Q first.", file=sys.stderr)
         sys.exit(4)
 
     manifest = {"account": account, "dst": dst_uuid, "sources": {}}
@@ -254,9 +254,9 @@ def run(target, do_apply):
             manifest["sources"][src_uuid] = {"moved": move, "overwritten": overwrite,
                                              "tasks": [t["id"] for t in src_tasks]}
     if not sources:
-        print("这个账号下只有一个组织文件夹，没有可搬的东西。")
+        print("This account has only one organization folder; nothing to move.")
     elif total == 0:
-        print("没有要搬的东西：会话和定时任务已经都在目标组织。")
+        print("Nothing to move: sessions and scheduled tasks are already in the target organization.")
     if do_apply:
         path = os.path.join(WORK, f"manifest-{time.strftime('%Y%m%d-%H%M%S')}.json")
         with open(path, "w") as f:
@@ -269,7 +269,7 @@ def cmd_list():
     current, _ = cli_org()
     accts = accounts()
     if not accts:
-        print("没找到 Claude Desktop 的 Code 会话目录：" + BASE)
+        print("Claude Desktop Code session folder not found: " + BASE)
         return
     aliases = load(ALIASES, {})
     rev = {v: k for k, v in aliases.items()}
@@ -282,7 +282,7 @@ def cmd_list():
             mark = "*" if o == current else " "
             extra = "  ".join(x for x in [names.get(o, ""), f"alias={rev[o]}" if o in rev else ""] if x)
             print(f" {mark} {o}  sessions={n} tasks={t}  {extra}".rstrip())
-    print("* = CLI 当前登录的组织。没显示名字的组织，用 CLI 登录过一次后就会记住名字。")
+    print("* = organization the CLI is logged into. Names appear once the CLI has logged into that organization.")
 
 
 def main():

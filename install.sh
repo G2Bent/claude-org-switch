@@ -8,13 +8,13 @@ SRC="${0:A:h}"
 DEST="$HOME/Library/Application Support/claude-org-switch"
 SKILL_DIR="$HOME/.claude/skills/switch"
 
-[[ "$(uname)" == "Darwin" ]] || { print "只支持 macOS 上的 Claude Desktop。"; exit 1; }
+[[ "$(uname)" == "Darwin" ]] || { print "Only Claude Desktop on macOS is supported."; exit 1; }
 if ! /usr/bin/python3 -c 'import sys' >/dev/null 2>&1; then
-  print "需要 /usr/bin/python3。先运行 xcode-select --install，装完再运行本脚本。"
+  print "/usr/bin/python3 is required. Run xcode-select --install, then run this script again."
   exit 1
 fi
 if [[ -f "$SKILL_DIR/SKILL.md" && "$1" != "--force" ]] && ! grep -q 'claude-org-switch' "$SKILL_DIR/SKILL.md"; then
-  print "$SKILL_DIR 已经有一个别的 /switch skill。确认要替换的话运行：$0 --force"
+  print "$SKILL_DIR already holds a different /switch skill. To replace it, run: $0 --force"
   exit 1
 fi
 
@@ -24,6 +24,6 @@ chmod +x "$DEST/switch-org.sh" "$DEST/run_after_quit.sh"
 [[ -f "$DEST/aliases.json" ]] || cp "$SRC/aliases.example.json" "$DEST/aliases.json"
 cp "$SRC/skill/SKILL.md" "$SKILL_DIR/SKILL.md"
 
-print "已安装到 $DEST"
-print "在 Claude Code 里输入 /switch 即可。先看看你的组织："
+print "Installed to $DEST"
+print "Type /switch in Claude Code to use it. Your organizations:"
 "$DEST/switch-org.sh" list

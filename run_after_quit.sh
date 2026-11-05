@@ -35,10 +35,10 @@ rc=$?
 echo "[$(date)] switch finished (exit $rc), reopening Desktop"
 open -a Claude
 if [[ $rc -eq 0 ]]; then
-  osascript -e 'display notification "运行 claude /login 选目标组织，再在 Desktop 切换组织" with title "Code 会话已移到目标组织"' 2>/dev/null
+  osascript -e 'display notification "Run claude /login and pick the target org, then switch org in Desktop" with title "Code sessions moved"' 2>/dev/null
 elif [[ $rc -eq 3 || $rc -eq 4 ]]; then
-  osascript -e 'display notification "什么都没改，详情看 run.log" with title "切换组织没有执行"' 2>/dev/null
+  osascript -e 'display notification "Nothing was changed. See run.log" with title "Org switch did not run"' 2>/dev/null
 else
-  osascript -e 'display notification "可能只搬了一部分，按 README 用最新备份回滚，详情看 run.log" with title "切换组织出错"' 2>/dev/null
+  osascript -e 'display notification "It may have moved only part. Restore the latest backup as the README says. See run.log" with title "Org switch failed"' 2>/dev/null
 fi
 echo "[$(date)] done"
