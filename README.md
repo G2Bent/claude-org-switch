@@ -37,7 +37,7 @@ Claude Desktop 按组织分开存 Code 侧边栏和定时任务：
 需要 macOS 和 `/usr/bin/python3`。没有的话先运行 `xcode-select --install`。
 
 ```bash
-git clone <本仓库地址> claude-org-switch
+git clone https://github.com/G2Bent/claude-org-switch.git
 ```
 
 ```bash
